@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StepsViewLayout">
+        <!--方向-->
+        <attr name="orientation" format="integer" />
+        <!--锚点数量-->
+        <attr name="anchorCount" format="integer" />
+        <!--锚点颜色-->
+        <attr name="anchorColor" format="color" />
+        <!--轨迹颜色-->
+        <attr name="trackColor" format="color" />
+        <!--添加指示器-->
+        <attr name="addIndicator" format="boolean" />
+        <!--在锚点左或上边添加 Tips-->
+        <attr name="left_or_top_tip_num" format="integer" />
+        <!--在锚点右或下边添加 Tips-->
+        <attr name="right_or_bottom_tip_num" format="integer" />
+        <!--指示器图案-->
+        <attr name="indicator_icon" format="integer" />
+        <!--是否添加给每个锚点添加标题-->
+        <attr name="add_text_title" format="boolean" />
+        <!--是否添加左边标签-->
+        <attr name="add_left_tips" format="boolean" />
+        <!--是否添加右边标签-->
+        <attr name="add_right_tips" format="boolean" />
+    </declare-styleable>
+
+</resources>

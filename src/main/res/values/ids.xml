@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="not_set_icon_id" type="drawable"/>
+    <item name="tips_left_container_id" type="id"/>
+    <item name="tips_right_container_id" type="id"/>
+    <item name="title_container_id" type="id"/>
+    <item name="steps_view_container_id" type="id"/>
+    <item name="steps_view_id" type="id"/>
+    <item name="steps_view_indicator" type="id"/>
+</resources>
