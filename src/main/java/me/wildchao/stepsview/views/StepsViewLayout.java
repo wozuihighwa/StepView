@@ -3,7 +3,6 @@ package me.wildchao.stepsview.views;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -11,13 +10,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 import me.wildchao.stepsview.R;
-import me.wildchao.stepsview.views.StepsViewByChaoS;
-import me.wildchao.stepsview.views.StepsViewIndicator;
 
 /**
  * Created by 孙俊伟 on 2016/3/3.
@@ -97,17 +93,23 @@ public class StepsViewLayout extends RelativeLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mStepsViewLayoutWidth = MeasureSpec.getSize(widthMeasureSpec);
         mStepsViewLayoutHeight = MeasureSpec.getSize(heightMeasureSpec);
+        // 如果是水平方向
         if (mOrientation == ORIENTATION_HORIZONTAL) {
             mStepViewWidth = mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize;
             mStepViewHeight = mTitleAndStepsViewHeight;
         }
-        if (isFirstAddView) {
-            addTitleCotainer();
-            addStepsViewContainer();
-            addStepsView();
-            addIndicator();
-            isFirstAddView = false;
+        // 如果是垂直方向
+        if (mOrientation == ORIENTATION_VERTICAL) {
+            mStepViewWidth = mTitleAndStepsViewHeight;
+            mStepViewHeight = mStepsViewLayoutHeight / mAnchorCount * (mAnchorCount - 1) + mAnchorSize;
         }
+//        if (isFirstAddView) {
+//            addTitleCotainer();
+//            addStepsViewContainer();
+//            addStepsView();
+//            addIndicator();
+//            isFirstAddView = false;
+//        }
     }
 
     /**
@@ -124,6 +126,7 @@ public class StepsViewLayout extends RelativeLayout {
         }
     }
 
+
     /**
      * 添加 StepView 的包裹布局
      */
@@ -133,14 +136,23 @@ public class StepsViewLayout extends RelativeLayout {
             mStepsViewContainer.setId(R.id.steps_view_container_id);
         }
 
-        RelativeLayout.LayoutParams lp = new LayoutParams(
-                mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lp = null;
 
-        lp.addRule(CENTER_HORIZONTAL);
+        // 如果是水平方向
+        if (mOrientation == ORIENTATION_HORIZONTAL) {
+            lp = new LayoutParams(mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.addRule(CENTER_HORIZONTAL);
 
-        if (mAddTitle) {
-            lp.addRule(BELOW, mTitleContainer.getId());
+            if (mAddTitle) {
+                lp.addRule(BELOW, mTitleContainer.getId());
+            }
+        }
+
+        // 如果是垂直方向
+        if (mOrientation == ORIENTATION_VERTICAL) {
+            lp = new LayoutParams(mTitleAndStepsViewHeight, mStepsViewLayoutHeight / mAnchorCount * (mAnchorCount - 1) + mAnchorSize);
+            lp.addRule(CENTER_IN_PARENT);
         }
 
         if (isFirstAddView) {
@@ -149,6 +161,29 @@ public class StepsViewLayout extends RelativeLayout {
             mStepsViewContainer.setLayoutParams(lp);
         }
 
+    }
+
+    /**
+     * 重新计算 StepsViewContainer
+     */
+    private void reLayoutStepsViewContainer() {
+        RelativeLayout.LayoutParams lp = null;
+        // 如果是水平方向
+        if (mOrientation == ORIENTATION_HORIZONTAL) {
+            lp = new LayoutParams(mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.addRule(CENTER_HORIZONTAL);
+
+            if (mAddTitle) {
+                lp.addRule(BELOW, mTitleContainer.getId());
+            }
+        }
+        // 如果是垂直方向
+        if (mOrientation == ORIENTATION_VERTICAL) {
+            lp = new LayoutParams(mTitleAndStepsViewHeight, mStepsViewLayoutHeight / mAnchorCount * (mAnchorCount - 1) + mAnchorSize);
+            lp.addRule(CENTER_IN_PARENT);
+        }
+        mStepsViewContainer.setLayoutParams(lp);
     }
 
     /**
@@ -161,7 +196,7 @@ public class StepsViewLayout extends RelativeLayout {
         }
 
         RelativeLayout.LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+                ViewGroup.LayoutParams.MATCH_PARENT);
         lp.addRule(CENTER_HORIZONTAL);
         if (isFirstAddView) {
             mStepsViewContainer.addView(mStepsView, lp);
@@ -182,8 +217,55 @@ public class StepsViewLayout extends RelativeLayout {
     }
 
     /**
+     * 重新计算 StepsView
+     */
+    private void reLayoutStepsView() {
+        RelativeLayout.LayoutParams lp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.addRule(CENTER_HORIZONTAL);
+        mStepsViewContainer.setLayoutParams(lp);
+        switch (mOrientation) {
+            case StepsViewByChaoS.ORIENTATION_VERTICAL:
+                setVerticalAnchorAndTrack();
+                break;
+            case StepsViewByChaoS.ORIENTATION_HORIZONTAL:
+                setHorizontalAnchorAndTrack();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 添加左边标签
+     */
+    private void addLeftTipsContainer() {
+        mLeftTipsContainer = new LinearLayout(getContext());
+        mLeftTipsContainer.setBackgroundColor(Color.RED);
+        mLeftTipsContainer.setId(R.id.tips_left_container_id);
+        mLeftTipsContainer.setOrientation(LinearLayout.VERTICAL);
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.addRule(LEFT_OF, R.id.steps_view_container_id);
+        addView(mLeftTipsContainer, lp);
+    }
+
+    /**
+     * 添加右边标签
+     */
+    private void addRightTipsContainer() {
+        mRightTipsContainer = new LinearLayout(getContext());
+        mRightTipsContainer.setBackgroundColor(Color.GREEN);
+        mRightTipsContainer.setId(R.id.tips_right_container_id);
+        mRightTipsContainer.setOrientation(LinearLayout.VERTICAL);
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.addRule(RIGHT_OF, R.id.steps_view_container_id);
+        addView(mRightTipsContainer, lp);
+    }
+
+    /**
      * 添加 指示器
      */
+
     private void addIndicator() {
         if (mIndicatorIconResId != R.drawable.not_set_icon_id) {
             mIndicator = new StepsViewIndicator(getContext());
@@ -191,7 +273,7 @@ public class StepsViewLayout extends RelativeLayout {
             LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.addRule(CENTER_VERTICAL);
-            mIndicator.setStepsViewContainerWidth(mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize);
+            mIndicator.setStepsViewTrackLength(mStepsViewLayoutWidth / mAnchorCount * (mAnchorCount - 1) + mAnchorSize,0);
             mIndicator.setIndicatorChangeListener(new StepsViewIndicator.IndicatorChangeListener() {
                 @Override
                 public void onChanged(int x) {
@@ -209,29 +291,6 @@ public class StepsViewLayout extends RelativeLayout {
             mStepsViewContainer.addView(mIndicator, lp);
         }
     }
-
-    /**
-     * 设置标题
-     *
-     * @param titleList
-     */
-    public void setTitle(List<String> titleList) {
-        mAnchorCount = titleList.size();
-        addStepsViewContainer();
-        addStepsView();
-        addIndicator();
-        for (int i = 0; i < mAnchorCount; i++) {
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT);
-            lp.weight = 1;
-            TextView title = new TextView(getContext());
-            title.setText(titleList.get(i));
-            title.setTextSize(16);
-            title.setTextColor(Color.BLACK);
-            title.setGravity(Gravity.CENTER);
-            mTitleContainer.addView(title, lp);
-        }
-    }
-
 
     /**
      * 生成竖直方向的锚点和轨迹坐标
@@ -288,6 +347,77 @@ public class StepsViewLayout extends RelativeLayout {
 
         mStepsView.setAnchorDrawParams(mAnchorParams);
         mStepsView.setTrackDrawParams(mTrackParams);
+    }
+
+    /**
+     * 设置标题
+     *
+     * @param titleList
+     */
+    public void setTitle(List<String> titleList) {
+        mAnchorCount = titleList.size();
+        addStepsViewContainer();
+        addStepsView();
+        addIndicator();
+        for (int i = 0; i < mAnchorCount; i++) {
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT);
+            lp.weight = 1;
+            TextView title = new TextView(getContext());
+            title.setText(titleList.get(i));
+            title.setTextSize(16);
+            title.setTextColor(Color.BLACK);
+            title.setGravity(Gravity.CENTER);
+            mTitleContainer.addView(title, lp);
+        }
+    }
+
+    /**
+     * 设置左边标签
+     */
+    public void setLeftTips(final List<String> tips) {
+        if (mOrientation == ORIENTATION_VERTICAL && mAddLeftTips) {
+            mAnchorCount = tips.size();
+            reLayoutStepsViewContainer();
+            reLayoutStepsView();
+            addStepsView();
+            addLeftTipsContainer();
+            for (int i = 0; i < mAnchorCount; i++) {
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+                lp.weight = 1;
+                TextView tip = new TextView(getContext());
+                tip.setText(tips.get(i));
+                tip.setTextSize(16);
+                tip.setTextColor(Color.BLACK);
+                tip.setGravity(Gravity.CENTER);
+                mLeftTipsContainer.addView(tip, lp);
+            }
+        }
+
+    }
+
+    /**
+     * 设置右边标签
+     *
+     * @param tips
+     */
+    public void setRightTips(final List<String> tips) {
+        if (mOrientation == ORIENTATION_VERTICAL && mAddRightTips) {
+            mAnchorCount = tips.size();
+            reLayoutStepsViewContainer();
+            reLayoutStepsView();
+            addRightTipsContainer();
+            for (int i = 0; i < mAnchorCount; i++) {
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+                lp.weight = 1;
+                TextView tip = new TextView(getContext());
+                tip.setText(tips.get(i));
+                tip.setTextSize(16);
+                tip.setTextColor(Color.BLACK);
+                tip.setGravity(Gravity.CENTER);
+                mRightTipsContainer.addView(tip, lp);
+            }
+        }
+
     }
 
     /**
